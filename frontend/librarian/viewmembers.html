@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Library</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <h1>Members</h1>
+    <div class="container">
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Password</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableContent">
+                <!-- {% for book in books %}
+                <tr>
+                    <th scope="row">{{book.id}}</th>
+                    <td>{{book.title}}</td>
+                    <td>{{book.author}}</td>
+                    <td>{{book.status}}</td>
+                    <td>
+                        <a href="/deletebook/{{book.id}}">Delete</a>
+                        <a href="/updatebook/{{book.id}}">Update</a>
+                    </td>
+                </tr>
+                {% endfor %} -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        async function handleUpdate(memberId) {
+            // const response = await fetch(`http://localhost:5000/updatebook/${bookId}`, {
+            //     method: 'PUT',
+            //     headers: { 'Authorization': 'Bearer ' + token }
+            // });
+
+            // if (response.status === 200) {
+            //     alert("")
+            // }
+            localStorage.setItem("updateMemberId", memberId)
+            window.location.href = 'updatemember.html';
+        }
+
+        async function handleDelete(memberId) {
+            const response = await fetch(`http://localhost:5000/deletemember/${memberId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token}
+            });
+            if (response.status === 200) {
+                alert("Book Deleted Successfuly")
+                window.location.href = "viewmembers.html"
+            } else {
+                alert(`Could not delete book ${response.json()}`)
+            }
+        }
+
+        async function viewMembers() {
+            const response = await fetch('http://localhost:5000/viewmembers', {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.status === 200) {
+                const members = await response.json();
+                const membersTable = document.getElementById('tableContent');
+                members.forEach(member => {
+                    const row = document.createElement("tr");
+                    // Object.values(book).forEach((columnData) => {
+                    //     const cell = document.createElement("td");
+                    //     cell.textContent = columnData;
+                    //     row.appendChild(cell);
+                    // });
+                    // const updatebook = document.createElement('a')
+                    // updatebook.href = ""
+                    // Book Id
+                    const memberIdCell = document.createElement("td");
+                    memberIdCell.textContent = member.id;
+                    row.appendChild(memberIdCell);
+
+                    // Title cell
+                    const nameCell = document.createElement("td");
+                    nameCell.textContent = member.username;
+                    row.appendChild(nameCell);
+
+                    // Author cell
+                    const passwordCell = document.createElement("td");
+                    passwordCell.textContent = member.password;
+                    row.appendChild(passwordCell);
+
+                    // Status Cell
+                    const statusCell = document.createElement("td")
+                    statusCell.textContent = member.status
+                    row.appendChild(statusCell)
+
+                    // Actions cell (Update & Delete buttons)
+                    const actionsCell = document.createElement("td");
+
+                    // Update button
+                    const updateButton = document.createElement("button");
+                    updateButton.classList.add('btn', 'btn-primary');
+                    updateButton.textContent = "Update";
+                    updateButton.onclick = () => handleUpdate(member.id);  // Pass bookId to the handler
+                    actionsCell.appendChild(updateButton);
+
+                    // Delete button
+                    const deleteButton = document.createElement("button");
+                    deleteButton.classList.add('btn', 'btn-danger');
+
+                    deleteButton.textContent = "Delete";
+                    deleteButton.onclick = () => handleDelete(member.id);  // Pass bookId to the handler
+                    actionsCell.appendChild(deleteButton);
+
+                    row.appendChild(actionsCell);
+                    membersTable.appendChild(row);
+                })
+
+
+
+                // booksDiv.innerHTML = '';
+                // books.forEach(book => {
+                //     booksDiv.innerHTML += `<p>${book.title} by ${book.author} is ${book.status}</p>`;
+                // });
+            } else {
+                alert('You are not authorized to view books');
+                window.location.href = '../login.html';
+            }
+        }
+        viewMembers();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
